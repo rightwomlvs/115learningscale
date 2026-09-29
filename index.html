@@ -166,12 +166,12 @@
             <label>Name / 姓名</label>
             <input type="text" id="studentName" placeholder="Your full name" required>
         </div>
-        <button class="btn" onclick="startSurvey()">Start Survey / 開始作答</button>
+        <button class="btn" onclick="startSurvey()">Start Survey / 開始測驗</button>
     </div>
 
     <!-- SECTION 2: Survey -->
     <div id="section-survey" class="section">
-        <p style="text-align: center; color: var(--text-gray);">Please select the frequency that best describes your learning style (1 = Never, 5 = Always).<br>請選擇最能描述你學習方式的頻率（1=從來沒有，5=總是如此）。</p>
+        <p style="text-align: center; color: var(--text-gray);">For each question, select a level from 1 to 5, choosing the answer that "best describes your learning style."<br>針對每道題目勾選1~5的等級，選擇「最能描述你的學習方式」的答案。</p>
         <form id="surveyForm">
             <div id="questions-container"></div>
             <button type="button" class="btn" onclick="calculateResults()">Analyze Results / 觀看分析結果</button>
@@ -218,47 +218,58 @@
 <script>
     // URL from Google Apps Script deployment (Step 1)
     // REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
-    const GOOGLE_APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWAn_AW7SFxBRTuw3KWRCVt_Mveh9SD_RQjNlFnqZjJbZas36FLjhnLYyYwMB2cXlQ6w/exec';
+    const GOOGLE_APP_SCRIPT_URL = 'YOUR_WEB_APP_URL_HERE';
 
     const dimensions = {
         selfMonitor: { 
             nameEn: "I. Self-Monitoring", nameZh: "一、自我監控", color: "#3B82F6",
             questions: [
-                {en: "I schedule time to review English vocabulary, grammar, or texts before exams.", zh: "在段考前，我會安排時間複習英文單字、文法或課文。"},
-                {en: "I can set learning goals for English class for myself (e.g., memorize 20 words this week).", zh: "我能為自己設定英文課的學習目標。"},
-                {en: "When taking a test or reading, I first figure out the key points the question requires.", zh: "寫英文測驗或閱讀文章時，我會先看懂題目要我找什麼重點。"}
+                {en: "I schedule time to review texts or notes before midterm exams.", zh: "在段考前，我會安排時間複習英文或筆記。"},
+                {en: "I can set learning goals for English class for myself (e.g., understanding context, practicing expression).", zh: "我能為自己設定英文課的學習目標(如理解文意、練習表達等)。"},
+                {en: "I clearly know the direction in which I want to improve in English class.", zh: "我清楚知道自己想在英文課上進步的方向。"},
+                {en: "When reading questions or articles, I first think clearly about the key points the question requires me to answer.", zh: "閱讀題目或文章時，我會先想清楚題目要我回答的重點。"},
+                {en: "Before writing or answering, I outline the overall content or steps first.", zh: "在寫作或作答前，我會先構思整體的內容或步驟。"},
+                {en: "When studying, I take notes on the teaching materials I have mastered or not yet mastered.", zh: "讀書時，我會筆記我已經精熟或尚未精熟的教材內容。"},
+                {en: "I properly organize and arrange my study time without procrastination.", zh: "我會妥善組織安排我的讀書時間，不拖延。"},
+                {en: "After writing the answer, I check again if it meets the requirements of the question.", zh: "寫完答案後，我會再檢查是否符合題意。"},
+                {en: "After completing exercises, I review mistakes and think about the reasons.", zh: "完成練習後，我會檢討錯誤並思考原因。"}
             ]
         },
         deepLearning: { 
             nameEn: "II. Deep Learning Strategies", nameZh: "二、深度學習策略", color: "#8B5CF6",
             questions: [
-                {en: "When memorizing vocabulary, I use example sentences, pronunciation, or context.", zh: "背單字時，我會利用例句、發音或文章上下文來幫助記憶。"},
-                {en: "I try to find rules or differences between different English sentence patterns.", zh: "我會嘗試找出不同英文句型、文法之間的規則或差異。"},
-                {en: "When reading long texts, I try to summarize paragraphs or highlight key points.", zh: "遇到長篇英文閱讀時，我會試著整理段落大意或在考卷上畫記重點。"}
+                {en: "I use exercises or discussions to check if I truly understand the key points of the text.", zh: "我會用練習題或討論來檢查自己是否真的懂英文的重點。"},
+                {en: "When reading the text, I think about whether there are different angles of interpretation.", zh: "閱讀英文時，我會思考是否有不同的詮釋角度。"},
+                {en: "I try to connect ideas between different texts or themes.", zh: "我會嘗試把不同英文或主題之間的想法連結起來。"},
+                {en: "I use images, tables, mind maps, or any note-taking methods to help me understand the article.", zh: "我會用圖像、表格、心智圖或任何筆記方式，幫助我理解文章。"},
+                {en: "I connect different works on the same theme or different sentences with the same concept for deeper understanding.", zh: "我會連結同主題的不同作品或同概念的不同文句，讓自己更深入理解。"},
+                {en: "I record examples explained by the teacher to help me understand or apply them to similar questions or situations encountered later.", zh: "我會記錄老師講解的例子，幫助我理解，或運用在之後遇到的類似題目或情境。"},
+                {en: "I organize the questions I have done to find frequently tested key points and questioning methods to help me understand how to deal with difficult questions.", zh: "我會整理做過的題目，找出常考重點與出題方式，幫助我了解如何應對較難的題目。"},
+                {en: "I classify different types of English questions (e.g., reading comprehension, rhetoric judgment, context inference) to find their common answering methods and thinking steps.", zh: "我會把不同類型的英文題(例如閱讀理解、修辭判斷、文意推論等)分類，找出它們的共通答題方法與思考步驟。"}
             ]
         },
         surfaceProcessing: { 
             nameEn: "III. Surface-level Information Processing", nameZh: "三、淺層訊息處理", color: "#10B981",
             questions: [
-                {en: "I memorize the Chinese meanings of words and grammar formulas emphasized in class.", zh: "我會記住老師上課強調的英文單字中文意思與必考文法公式。"},
-                {en: "When preparing for exams, I repeatedly review my vocabulary lists and class notes.", zh: "準備考試的時候，我會反覆複習我的單字表、課堂筆記與小考考卷。"},
-                {en: "I use examples from textbooks or handouts to familiarize myself with question types.", zh: "我會利用課本或講義中的範例，幫助我熟悉英文題型。"}
+                {en: "I memorize the key content of the text and the problem-solving steps.", zh: "我會記住英文的重點內容與解題步驟。"},
+                {en: "When preparing for exams, I review my class notes, exam papers, and other supporting resources.", zh: "準備考試的時候，我會複習我的課堂筆記、考卷與其他配套資源。"},
+                {en: "I use examples in textbooks or handouts to help me become familiar with key points and question types.", zh: "我會利用課本或講義中的範例，幫助我熟悉重點與題型。"}
             ]
         },
         persistence: { 
             nameEn: "IV. Persistence", nameZh: "四、堅持力", color: "#F59E0B",
             questions: [
-                {en: "When I encounter sentences I don't understand, I check a dictionary or ask until I understand.", zh: "當我遇到看不懂的英文句子時，我會查字典或發問直到理解。"},
-                {en: "When facing difficulties in reading comprehension, I try to guess from keywords instead of giving up.", zh: "寫閱讀測驗遇到困難時，我會試著抓關鍵字推敲，而不是立刻放棄。"},
-                {en: "Even if my grades fall behind, I am willing to use methods to learn and won't give up.", zh: "即使英文成績暫時落後，我也願意運用方法去學，不會直接放棄。"}
+                {en: "When I don't understand the text or questions, I read it a few more times or ask teachers and classmates until I understand.", zh: "當我看不懂英文或題目時，會再讀幾次或請教師長、同學，直到理解。"},
+                {en: "When I encounter difficulties in writing or exercising, I try to find a solution instead of giving up immediately.", zh: "當寫作或練習遇到困難時，我會試著想辦法解決，而不是立刻放棄。"},
+                {en: "Even if incomprehensible questions or articles appear on the exam paper, I am willing to use methods to understand them and will not give up directly.", zh: "即使試卷上出現讀不懂的題目或文章，我也願意運用方法去理解，不會直接放棄。"}
             ]
         },
         envStructure: { 
             nameEn: "V. Environmental Structuring", nameZh: "五、環境結構安排", color: "#EF4444",
             questions: [
-                {en: "I find a place where I can concentrate on studying English.", zh: "我會找一個能讓我專心背單字或讀英文的地方。"},
-                {en: "When studying English, I isolate myself from distractions (phones, internet).", zh: "讀英文時，我會把自己和會讓我分心的人事物隔離開來。"},
-                {en: "I schedule regular time to stably expose myself to English.", zh: "我會固定安排時間，讓自己能穩定地接觸英文。"}
+                {en: "I arrange and set up an uninterrupted study environment.", zh: "我會安排布置一個不受干擾的讀書環境。"},
+                {en: "I isolate myself from people and things that distract me (phones, internet, or others).", zh: "我把自己和會讓我分心的人事物(手機、網路或他人)隔離開來。"},
+                {en: "I arrange time and space so I can study stably.", zh: "我會安排時間和空間，讓自己能穩定學習。"}
             ]
         }
     };
