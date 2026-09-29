@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Process Scale | 學習過程量表</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #EEF2FF;
+            --text-dark: #1F2937;
+            --text-gray: #4B5563;
+            --bg-gray: #F9FAFB;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f3f4f6;
+            color: var(--text-dark);
+            line-height: 1.6;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-gray);
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Form Inputs */
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .input-group textarea { resize: vertical; }
+        
+        /* Question Blocks */
+        .dimension-title {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-top: 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .question-block {
+            margin: 20px 0;
+            padding: 15px;
+            background: var(--bg-gray);
+            border-radius: 8px;
+            border-left: 4px solid #D1D5DB;
+        }
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .question-sub {
+            color: var(--text-gray);
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .option-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: var(--text-gray);
+            text-align: center;
+        }
+        .option-label input {
+            margin-bottom: 5px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #4338CA; }
+        .btn:disabled { background-color: #9CA3AF; cursor: not-allowed; }
+
+        /* Results Chart */
+        .bar-container { margin-bottom: 20px; }
+        .bar-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: 500; }
+        .bar-background { height: 24px; background-color: #E5E7EB; border-radius: 12px; overflow: hidden; }
+        .bar-fill {
+            height: 100%; width: 0%; transition: width 1s ease-in-out;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 10px; color: white; font-size: 0.85em; font-weight: bold;
+        }
+        
+        .reflection-box {
+            background-color: #FFFBEB;
+            border: 1px solid #FDE68A;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Learning Process Scale</h1>
+    <div class="subtitle">學習過程量表 (技高英文科)</div>
+
+    <!-- SECTION 1: Student Info -->
+    <div id="section-info" class="section active">
+        <h3>Student Information / 學生基本資料</h3>
+        <div class="input-group">
+            <label>Class / 班級</label>
+            <input type="text" id="studentClass" placeholder="e.g., 101" required>
+        </div>
+        <div class="input-group">
+            <label>Seat No. / 座號</label>
+            <input type="number" id="seatNo" placeholder="e.g., 05" required>
+        </div>
+        <div class="input-group">
+            <label>Name / 姓名</label>
+            <input type="text" id="studentName" placeholder="Your full name" required>
+        </div>
+        <button class="btn" onclick="startSurvey()">Start Survey / 開始測驗</button>
+    </div>
+
+    <!-- SECTION 2: Survey -->
+    <div id="section-survey" class="section">
+        <p style="text-align: center; color: var(--text-gray);">Please select the frequency that best describes your learning style (1 = Never, 5 = Always).<br>請選擇最能描述你學習方式的頻率（1=從來沒有，5=總是如此）。</p>
+        <form id="surveyForm">
+            <div id="questions-container"></div>
+            <button type="button" class="btn" onclick="calculateResults()">Analyze Results / 觀看分析結果</button>
+        </form>
+    </div>
+
+    <!-- SECTION 3: Results & Reflection -->
+    <div id="section-results" class="section">
+        <h2>Your Learning Profile / 你的學習力診斷報告</h2>
+        <div id="bars-container"></div>
+
+        <div class="reflection-box">
+            <h3 style="color: #B45309; margin-top: 0;">Reflection & Integration / 省思與統整</h3>
+            
+            <div class="input-group">
+                <label>1. Which dimension in this scale do you most want (or need) to strengthen? Why?<br>
+                <span style="font-weight: normal; color: var(--text-gray);">這份量表中，我最想(或最需要)加強的是哪一個面向？為什麼？</span></label>
+                <textarea id="ref1" rows="3" placeholder="Type your answer here..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>2. Which item have you achieved recently that makes you feel you've progressed?<br>
+                <span style="font-weight: normal; color: var(--text-gray);">哪一項是我最近有做到、讓我覺得進步的？</span></label>
+                <textarea id="ref2" rows="3" placeholder="Type your answer here..."></textarea>
+            </div>
+
+            <div class="input-group">
+                <label>3. What small things can you do more for your learning next?<br>
+                <span style="font-weight: normal; color: var(--text-gray);">接下來我可以為自己的學習多做哪一些小事？</span></label>
+                <textarea id="ref3" rows="3" placeholder="Type your answer here..."></textarea>
+            </div>
+
+            <button type="button" id="submitBtn" class="btn" style="background-color: #059669;" onclick="submitData()">Submit to Teacher / 送出資料</button>
+        </div>
+    </div>
+
+    <!-- SECTION 4: Thank You -->
+    <div id="section-thanks" class="section" style="text-align: center; padding: 40px 0;">
+        <h2 style="color: #059669;">Submission Successful! / 送出成功！</h2>
+        <p>Thank you for completing the self-reflection. / 感謝你完成自我省思。</p>
+    </div>
+</div>
+
+<script>
+    // URL from Google Apps Script deployment (Step 1)
+    // REPLACE THIS WITH YOUR DEPLOYED WEB APP URL
+    const GOOGLE_APP_SCRIPT_URL = 'YOUR_WEB_APP_URL_HERE';
+
+    const dimensions = {
+        selfMonitor: { 
+            nameEn: "I. Self-Monitoring", nameZh: "一、自我監控", color: "#3B82F6",
+            questions: [
+                {en: "I schedule time to review English vocabulary, grammar, or texts before exams.", zh: "在段考前，我會安排時間複習英文單字、文法或課文。"},
+                {en: "I can set learning goals for English class for myself (e.g., memorize 20 words this week).", zh: "我能為自己設定英文課的學習目標。"},
+                {en: "When taking a test or reading, I first figure out the key points the question requires.", zh: "寫英文測驗或閱讀文章時，我會先看懂題目要我找什麼重點。"}
+            ]
+        },
+        deepLearning: { 
+            nameEn: "II. Deep Learning Strategies", nameZh: "二、深度學習策略", color: "#8B5CF6",
+            questions: [
+                {en: "When memorizing vocabulary, I use example sentences, pronunciation, or context.", zh: "背單字時，我會利用例句、發音或文章上下文來幫助記憶。"},
+                {en: "I try to find rules or differences between different English sentence patterns.", zh: "我會嘗試找出不同英文句型、文法之間的規則或差異。"},
+                {en: "When reading long texts, I try to summarize paragraphs or highlight key points.", zh: "遇到長篇英文閱讀時，我會試著整理段落大意或在考卷上畫記重點。"}
+            ]
+        },
+        surfaceProcessing: { 
+            nameEn: "III. Surface-level Information Processing", nameZh: "三、淺層訊息處理", color: "#10B981",
+            questions: [
+                {en: "I memorize the Chinese meanings of words and grammar formulas emphasized in class.", zh: "我會記住老師上課強調的英文單字中文意思與必考文法公式。"},
+                {en: "When preparing for exams, I repeatedly review my vocabulary lists and class notes.", zh: "準備考試的時候，我會反覆複習我的單字表、課堂筆記與小考考卷。"},
+                {en: "I use examples from textbooks or handouts to familiarize myself with question types.", zh: "我會利用課本或講義中的範例，幫助我熟悉英文題型。"}
+            ]
+        },
+        persistence: { 
+            nameEn: "IV. Persistence", nameZh: "四、堅持力", color: "#F59E0B",
+            questions: [
+                {en: "When I encounter sentences I don't understand, I check a dictionary or ask until I understand.", zh: "當我遇到看不懂的英文句子時，我會查字典或發問直到理解。"},
+                {en: "When facing difficulties in reading comprehension, I try to guess from keywords instead of giving up.", zh: "寫閱讀測驗遇到困難時，我會試著抓關鍵字推敲，而不是立刻放棄。"},
+                {en: "Even if my grades fall behind, I am willing to use methods to learn and won't give up.", zh: "即使英文成績暫時落後，我也願意運用方法去學，不會直接放棄。"}
+            ]
+        },
+        envStructure: { 
+            nameEn: "V. Environmental Structuring", nameZh: "五、環境結構安排", color: "#EF4444",
+            questions: [
+                {en: "I find a place where I can concentrate on studying English.", zh: "我會找一個能讓我專心背單字或讀英文的地方。"},
+                {en: "When studying English, I isolate myself from distractions (phones, internet).", zh: "讀英文時，我會把自己和會讓我分心的人事物隔離開來。"},
+                {en: "I schedule regular time to stably expose myself to English.", zh: "我會固定安排時間，讓自己能穩定地接觸英文。"}
+            ]
+        }
+    };
+
+    let calculatedScores = {};
+
+    // Initialize UI
+    const container = document.getElementById('questions-container');
+    for (const [dimKey, dimData] of Object.entries(dimensions)) {
+        let dimHTML = `<div class="dimension-title" style="color:${dimData.color}; background-color:${dimData.color}15">${dimData.nameEn} / ${dimData.nameZh}</div>`;
+        
+        dimData.questions.forEach((q, index) => {
+            const inputName = `q_${dimKey}_${index}`;
+            dimHTML += `
+                <div class="question-block">
+                    <div class="question-text">${index + 1}. ${q.en}</div>
+                    <div class="question-sub">${q.zh}</div>
+                    <div class="options">
+                        ${[1, 2, 3, 4, 5].map(val => `
+                            <label class="option-label">
+                                <input type="radio" name="${inputName}" value="${val}" required>
+                                ${val === 1 ? '1<br>(Never/從不)' : val === 5 ? '5<br>(Always/總是)' : val}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML += dimHTML;
+    }
+
+    function switchSection(sectionId) {
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(sectionId).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function startSurvey() {
+        const cls = document.getElementById('studentClass').value;
+        const no = document.getElementById('seatNo').value;
+        const name = document.getElementById('studentName').value;
+        
+        if(!cls || !no || !name) {
+            alert('Please complete your information first. / 請先填寫基本資料。');
+            return;
+        }
+        switchSection('section-survey');
+    }
+
+    function calculateResults() {
+        const form = document.getElementById('surveyForm');
+        if (!form.checkValidity()) {
+            alert('Please answer all questions. / 請確認每一題都已經作答完畢！');
+            return;
+        }
+
+        const formData = new FormData(form);
+        const sums = {};
+
+        // Calculate Sums
+        for (let [key, value] of formData.entries()) {
+            const dim = key.split('_')[1];
+            if (!sums[dim]) sums[dim] = { total: 0, count: 0 };
+            sums[dim].total += parseInt(value);
+            sums[dim].count++;
+        }
+
+        const barsContainer = document.getElementById('bars-container');
+        barsContainer.innerHTML = '';
+
+        for (const [dimKey, data] of Object.entries(sums)) {
+            const avg = (data.total / data.count).toFixed(1);
+            calculatedScores[dimKey] = avg;
+            const percentage = (avg / 5) * 100;
+            const dimInfo = dimensions[dimKey];
+
+            barsContainer.innerHTML += `
+                <div class="bar-container">
+                    <div class="bar-label">
+                        <span style="color: ${dimInfo.color}">${dimInfo.nameEn}</span>
+                        <span>${avg} / 5.0</span>
+                    </div>
+                    <div class="bar-background">
+                        <div class="bar-fill" style="background-color: ${dimInfo.color}; width: 0%" data-width="${percentage}%">${avg}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        switchSection('section-results');
+        
+        setTimeout(() => {
+            document.querySelectorAll('.bar-fill').forEach(bar => {
+                bar.style.width = bar.getAttribute('data-width');
+            });
+        }, 100);
+    }
+
+    function submitData() {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = 'Submitting... / 送出中...';
+
+        const payload = {
+            studentClass: document.getElementById('studentClass').value,
+            seatNo: document.getElementById('seatNo').value,
+            studentName: document.getElementById('studentName').value,
+            scores: calculatedScores,
+            reflection1: document.getElementById('ref1').value,
+            reflection2: document.getElementById('ref2').value,
+            reflection3: document.getElementById('ref3').value
+        };
+
+        if(GOOGLE_APP_SCRIPT_URL === 'YOUR_WEB_APP_URL_HERE') {
+            alert("Error: Please replace the GOOGLE_APP_SCRIPT_URL in the code with your actual deployed URL.");
+            btn.disabled = false;
+            btn.innerText = 'Submit to Teacher / 送出資料';
+            return;
+        }
+
+        fetch(GOOGLE_APP_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Necessary to bypass CORS issues with Google Scripts redirect
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            switchSection('section-thanks');
+        }).catch(err => {
+            alert('Submission failed. Please try again. / 送出失敗，請重試。');
+            btn.disabled = false;
+            btn.innerText = 'Submit to Teacher / 送出資料';
+        });
+    }
+</script>
+
+</body>
+</html>
